@@ -42,15 +42,19 @@ function App() {
 
   useEffect(() => {
     async function loadData() {
-      if (!isApiKeyConfigured()) {
-        setUsingMockData(true);
-        return;
-      }
-
       setLoading(true);
       setError(null);
 
       try {
+        // Check if API key is configured on backend
+        const apiConfigured = await isApiKeyConfigured();
+
+        if (!apiConfigured) {
+          setUsingMockData(true);
+          setLoading(false);
+          return;
+        }
+
         const { startDate, endDate } = getDateRange();
 
         const [orgInfo, usageData] = await Promise.all([
@@ -97,12 +101,15 @@ function App() {
             <div>
               <p className="text-sm font-medium text-amber-800">Using Demo Data</p>
               <p className="text-sm text-amber-700 mt-1">
-                To view your real Claude usage, create a <code className="bg-amber-100 px-1 rounded">.env</code> file with your Admin API key:
+                To view your real Claude usage, add your Admin API key to the <code className="bg-amber-100 px-1 rounded">.env</code> file:
               </p>
               <pre className="mt-2 text-xs bg-amber-100 p-2 rounded overflow-x-auto">
-                VITE_ANTHROPIC_ADMIN_API_KEY=your_admin_api_key_here
+                ANTHROPIC_ADMIN_API_KEY=your_admin_api_key_here
               </pre>
               <p className="text-xs text-amber-600 mt-2">
+                Then restart the backend server with: <code className="bg-amber-100 px-1 rounded">npm run server</code>
+              </p>
+              <p className="text-xs text-amber-600 mt-1">
                 Get your Admin API key from: <a href="https://console.anthropic.com/settings/admin-keys" target="_blank" rel="noopener noreferrer" className="underline">console.anthropic.com/settings/admin-keys</a>
               </p>
             </div>
